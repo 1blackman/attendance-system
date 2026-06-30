@@ -33,7 +33,7 @@ form.addEventListener("submit", function (e) {
 
             try {
 
-                const response = await fetch("https://seift.app.n8n.cloud/webhook-test/attendance", {
+                const response = await fetch("https://seift.app.n8n.cloud/webhook/attendance", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -42,9 +42,10 @@ form.addEventListener("submit", function (e) {
                 });
 
                 if (response.ok) {
-                    status.innerHTML = "✅ تم إرسال البيانات بنجاح";
+                    status.innerHTML = "✅ تم تسجيل الحضور بنجاح";
+                    form.reset();
                 } else {
-                    status.innerHTML = "❌ فشل إرسال البيانات";
+                    status.innerHTML = "❌ فشل تسجيل الحضور";
                 }
 
             } catch (error) {
@@ -53,8 +54,27 @@ form.addEventListener("submit", function (e) {
             }
 
         },
-        function () {
-            status.innerHTML = "❌ يرجى السماح بالوصول إلى الموقع";
+        function (error) {
+
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    status.innerHTML = "❌ يرجى السماح بالوصول إلى الموقع";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    status.innerHTML = "❌ تعذر تحديد الموقع";
+                    break;
+                case error.TIMEOUT:
+                    status.innerHTML = "❌ انتهت مهلة تحديد الموقع";
+                    break;
+                default:
+                    status.innerHTML = "❌ حدث خطأ";
+            }
+
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
         }
     );
 });
